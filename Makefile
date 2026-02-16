@@ -13,5 +13,8 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
 
+test: $(TARGET)
+	./tests/regression.sh
+
 clean:
 	rm -f $(TARGET)
