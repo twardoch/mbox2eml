@@ -87,6 +87,17 @@ bool isLikelyMboxSeparator(const std::string& line) {
     return false;
   }
 
+  // Handle optional timezone offset between time and year
+  // e.g., "From sender Wed Mar 25 09:23:47 +0000 2026"
+  if (!year.empty() && (year[0] == '+' || year[0] == '-') &&
+      year.size() >= 2 && isAllDigits(year.substr(1))) {
+    std::string actual_year;
+    if (!(iss >> actual_year)) {
+      return false;
+    }
+    year = actual_year;
+  }
+
   if (!isAllDigits(year) || year.size() != 4) {
     return false;
   }
@@ -107,6 +118,9 @@ std::vector<Email> extractEmails(const std::string& mbox_file) {
   bool in_message = false;
 
   while (std::getline(file, line)) {
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
     if (isLikelyMboxSeparator(line)) {
       // Start of a new email
       if (in_message && !current_email.content.empty()) {
